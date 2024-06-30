@@ -9,6 +9,7 @@ A central repository for FFXI packet data.
 - Handle both S2C and C2S packets.
 - Timed fallback for sending buffer from client.
 - Forced send from client on logout.
+- Unify on UserId or CharacterToken.
 - Do not archive packets that are part of a currently-ongoing session.
 - Cut session if character name changes (logging into alts), but session should be cut automatically on logout.
 - A final stage of processing to happen when a session is closed.
