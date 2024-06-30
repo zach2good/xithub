@@ -131,14 +131,14 @@ def process_packets():
 if __name__ == '__main__':
     while True:
         start = datetime.now()
-        print(f"Packet Processing started at {start}")
+        print(f"Packet processing started at {start}")
 
         process_packets()
         try_cut_sessions()
 
         end = datetime.now()
-        print(f"Packet Processing completed at {end}")
-        print(f"Total archiving time: {end - start}")
+        print(f"Packet processing completed at {end}")
+        print(f"Total processing time: {end - start}")
 
         next_run = end + timedelta(seconds=PROCESS_INTERVAL)
         print(f"Next run will be at {next_run}")
