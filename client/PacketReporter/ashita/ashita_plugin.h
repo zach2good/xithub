@@ -39,6 +39,7 @@ class PacketReporter final : public IPlugin
     uint32_t m_PluginId;       // The plugins id. (The plugins current base address.)
 
     std::unique_ptr<PacketReporterCore> reporterCore;
+    std::string clientToken;
 
 public:
     PacketReporter(void);
@@ -58,6 +59,10 @@ public:
     bool Initialize(IAshitaCore* core, ILogManager* logger, uint32_t id) override;
     void Release(void) override;
 
+    // Event Callbacks: ChatManager
+    auto HandleCommand(int32_t mode, const char* command, bool injected) -> bool override;
+
+    // Event Callbacks: PacketManager
     bool HandleIncomingPacket(uint16_t id, uint32_t size, const uint8_t* data, uint8_t* modified, uint32_t sizeChunk, const uint8_t* dataChunk, bool injected, bool blocked) override;
 };
 

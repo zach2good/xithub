@@ -74,7 +74,7 @@ int32_t PacketReporter::GetPriority(void) const
 
 uint32_t PacketReporter::GetFlags(void) const
 {
-    return (uint32_t)Ashita::PluginFlags::UsePackets;
+    return (uint32_t)Ashita::PluginFlags::Legacy;
 }
 
 bool PacketReporter::Initialize(IAshitaCore* core, ILogManager* logger, const uint32_t id)
@@ -84,8 +84,10 @@ bool PacketReporter::Initialize(IAshitaCore* core, ILogManager* logger, const ui
     this->m_PluginId   = id;
 
     this->reporterCore = std::make_unique<PacketReporterCore>([this](const std::string& msg) {
-        this->m_LogManager->Log(1, "PacketReporter", msg.c_str());
+        this->m_AshitaCore->GetChatManager()->Write(1, false, msg.c_str());
     });
+
+    // TODO: load client token from config
 
     return true;
 }
@@ -93,6 +95,36 @@ bool PacketReporter::Initialize(IAshitaCore* core, ILogManager* logger, const ui
 void PacketReporter::Release(void)
 {
     this->reporterCore = nullptr;
+}
+
+auto PacketReporter::HandleCommand(int32_t mode, const char* command, bool injected) -> bool
+{
+    UNREFERENCED_PARAMETER(mode);
+    UNREFERENCED_PARAMETER(injected);
+
+    std::vector<std::string> args{};
+    const auto count = Ashita::Commands::GetCommandArgs(command, &args);
+
+    HANDLECOMMAND("/packetreporter")
+    {
+        if (count >= 2)
+        {
+            clientToken     = args[1];
+            std::string str = "[packetreporter] Command executed: /packetreporter " + args[1];
+            this->m_AshitaCore->GetChatManager()->Write(1, false, str.c_str());
+
+            return true;
+        }
+        else
+        {
+            std::string str = "[packetreporter] Command executed: /packetreporter";
+            this->m_AshitaCore->GetChatManager()->Write(1, false, str.c_str());
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 bool PacketReporter::HandleIncomingPacket(uint16_t id, uint32_t size, const uint8_t* data, uint8_t* modified, uint32_t sizeChunk, const uint8_t* dataChunk, bool injected, bool blocked)
