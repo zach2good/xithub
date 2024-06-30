@@ -32,7 +32,7 @@ public:
 #pragma pack(push, 1)
     struct OuterPacketHeader
     {
-        uint64_t userId;
+        uint64_t clientToken;
         uint64_t timestamp;
         uint8_t serverId;
         char characterName[15];
@@ -51,6 +51,10 @@ public:
 
     struct CharacterInfo
     {
+        // User
+        uint64_t clientToken;
+
+        // Game
         std::string name;
         uint16_t zoneId;
         uint8_t serverId;

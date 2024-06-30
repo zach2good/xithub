@@ -68,7 +68,7 @@ void PacketReporterCore::HandlePacketData(CharacterInfo charInfo, uint8_t* data,
 
         // Outer header
         OuterPacketHeader header;
-        header.userId    = 44; // TODO: Look up from user config
+        header.clientToken = charInfo.clientToken;
         header.timestamp = timestamp;
         header.serverId  = charInfo.serverId;
         std::memcpy(header.characterName, charInfo.name.c_str(), std::min<size_t>(charInfo.name.size(), sizeof(header.characterName)));

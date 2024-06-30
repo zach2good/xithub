@@ -15,23 +15,26 @@ def start_server(host='localhost', port=5000, output_dir='packets'):
         if data:
             print(f"Received data from {addr}")
 
-            # Define the outer header format
-            outer_header_format = '<QQI'  # < specifies little-endian, Q for uint64_t, I for uint32_t
+            # Define the new outer header format
+            outer_header_format = '<QQB15sI'  # < specifies little-endian, Q for uint64_t, B for uint8_t, 15s for 15-char string, I for uint32_t
             outer_header_size = struct.calcsize(outer_header_format)
+
             if len(data) < outer_header_size:
                 print("Error: Received data is smaller than outer header size.")
                 continue
 
             # Unpack the outer header
             outer_header_data = data[:outer_header_size]
-            userId, timestamp, compressed_data_size = struct.unpack(outer_header_format, outer_header_data)
+            clientToken, timestamp, serverId, characterName, dataSize = struct.unpack(outer_header_format, outer_header_data)
+
+            characterName = characterName.decode('utf-8', errors='ignore').rstrip('\x00')
 
             # TODO: Validate userId and throw away the packet if it's isn't a registered user
 
             # Store the entire packet to a file
-            packet_filename = os.path.join(output_dir, f"packet_{userId}_{timestamp}.bin")
+            packet_filename = os.path.join(output_dir, f"packet_{clientToken}_{timestamp}.bin")
             with open(packet_filename, 'wb') as packet_file:
-                print(f"Writing packet to {packet_filename}")
+                print(f"{timestamp} | [{clientToken}] Writing packet to {packet_filename} (size: {len(data)})")
                 packet_file.write(data)
 
 

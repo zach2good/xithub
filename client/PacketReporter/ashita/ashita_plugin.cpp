@@ -22,6 +22,7 @@
  */
 
 #include "ashita_plugin.h"
+#include <string>
 
 #pragma comment(lib, "psapi.lib")
 #include <psapi.h>
@@ -89,6 +90,9 @@ bool PacketReporter::Initialize(IAshitaCore* core, ILogManager* logger, const ui
 
     // TODO: load client token from config
 
+    std::string str = std::string("[packetreporter] Client Token: ") + (!clientToken.empty() ? clientToken : std::string("<empty>"));
+    this->m_AshitaCore->GetChatManager()->Write(1, false, str.c_str());
+
     return true;
 }
 
@@ -110,14 +114,14 @@ auto PacketReporter::HandleCommand(int32_t mode, const char* command, bool injec
         if (count >= 2)
         {
             clientToken     = args[1];
-            std::string str = "[packetreporter] Command executed: /packetreporter " + args[1];
+            std::string str = "[packetreporter] Setting Client Token: " + args[1];
             this->m_AshitaCore->GetChatManager()->Write(1, false, str.c_str());
 
             return true;
         }
         else
         {
-            std::string str = "[packetreporter] Command executed: /packetreporter";
+            std::string str = "[packetreporter] How to use: (TODO)";
             this->m_AshitaCore->GetChatManager()->Write(1, false, str.c_str());
         }
 
@@ -129,11 +133,22 @@ auto PacketReporter::HandleCommand(int32_t mode, const char* command, bool injec
 
 bool PacketReporter::HandleIncomingPacket(uint16_t id, uint32_t size, const uint8_t* data, uint8_t* modified, uint32_t sizeChunk, const uint8_t* dataChunk, bool injected, bool blocked)
 {
+    if (clientToken.empty())
+    {
+        return false;
+    }
+
     PacketReporterCore::CharacterInfo info;
+
+    // turn clientToken string into a uint64_t
+    info.clientToken = std::stoi(clientToken);
+
     info.name     = m_AshitaCore->GetMemoryManager()->GetParty()->GetMemberName(0);
     info.zoneId   = m_AshitaCore->GetMemoryManager()->GetParty()->GetMemberZone(0);
     info.serverId = 0; // TODO
+
     this->reporterCore->HandlePacketData(info, modified, size);
+
     return false;
 }
 
