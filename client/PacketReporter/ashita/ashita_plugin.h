@@ -38,7 +38,7 @@ class PacketReporter final : public IPlugin
     ILogManager* m_LogManager; // The pointer to the main Ashita LogManager object.
     uint32_t m_PluginId;       // The plugins id. (The plugins current base address.)
 
-    std::unique_ptr<PacketReporterCore> wrCore;
+    std::unique_ptr<PacketReporterCore> reporterCore;
 
 public:
     PacketReporter(void);

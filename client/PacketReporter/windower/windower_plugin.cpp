@@ -50,10 +50,14 @@ namespace
         (*lua)["print"](str);
     }
 
-    void SendPutRequest(sol::table table, std::string data)
+    void Submit(sol::table table, std::string data)
     {
-        static PacketReporterCore wrCore([](const std::string& str) { Print(str); });
-        wrCore.HandlePacketData((uint8_t*)data.data(), data.size());
+        static PacketReporterCore reporterCore([](const std::string& str) { Print(str); });
+        PacketReporterCore::CharacterInfo info;
+        info.name     = table["name"];
+        info.zoneId   = table["zone"];
+        info.serverId = table["server"];
+        reporterCore.HandlePacketData(info, (uint8_t*)data.data(), data.size());
     }
 } // namespace
 
@@ -63,7 +67,7 @@ extern "C" __declspec(dllexport) int luaopen__PacketReporter(lua_State* L)
 
     (*lua).create_table("_PacketReporter");
     (*lua)["_PacketReporter"]["print"]  = &::Print;
-    (*lua)["_PacketReporter"]["submit"] = &::SendPutRequest;
+    (*lua)["_PacketReporter"]["submit"] = &::Submit;
 
     return 1;
 }

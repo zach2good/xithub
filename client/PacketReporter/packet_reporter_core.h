@@ -26,10 +26,36 @@ T& ref(U* buf, std::size_t index)
 
 class PacketReporterCore
 {
-
     using LoggingCallback = std::function<void(const std::string&)>;
 
 public:
+#pragma pack(push, 1)
+    struct OuterPacketHeader
+    {
+        uint64_t userId;
+        uint64_t timestamp;
+        uint8_t serverId;
+        char characterName[15];
+        uint32_t dataSize;
+    };
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+    struct InnerPacketHeader
+    {
+        uint64_t timestamp;
+        uint16_t zoneId;
+        uint32_t dataSize;
+    };
+#pragma pack(pop)
+
+    struct CharacterInfo
+    {
+        std::string name;
+        uint16_t zoneId;
+        uint8_t serverId;
+    };
+
     PacketReporterCore(LoggingCallback loggingCallback);
     ~PacketReporterCore();
 
@@ -40,7 +66,7 @@ public:
 
     bool DetectRetail();
 
-    void HandlePacketData(uint8_t* data, uint32_t dataSz);
+    void HandlePacketData(CharacterInfo charInfo, uint8_t* data, uint32_t dataSz);
 
 private:
     LoggingCallback m_loggingCallback;

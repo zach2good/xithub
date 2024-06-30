@@ -83,7 +83,7 @@ bool PacketReporter::Initialize(IAshitaCore* core, ILogManager* logger, const ui
     this->m_LogManager = logger;
     this->m_PluginId   = id;
 
-    this->wrCore = std::make_unique<PacketReporterCore>([this](const std::string& msg) {
+    this->reporterCore = std::make_unique<PacketReporterCore>([this](const std::string& msg) {
         this->m_LogManager->Log(1, "PacketReporter", msg.c_str());
     });
 
@@ -92,12 +92,16 @@ bool PacketReporter::Initialize(IAshitaCore* core, ILogManager* logger, const ui
 
 void PacketReporter::Release(void)
 {
-    this->wrCore = nullptr;
+    this->reporterCore = nullptr;
 }
 
 bool PacketReporter::HandleIncomingPacket(uint16_t id, uint32_t size, const uint8_t* data, uint8_t* modified, uint32_t sizeChunk, const uint8_t* dataChunk, bool injected, bool blocked)
 {
-    this->wrCore->HandlePacketData(modified, size);
+    PacketReporterCore::CharacterInfo info;
+    info.name     = m_AshitaCore->GetMemoryManager()->GetParty()->GetMemberName(0);
+    info.zoneId   = m_AshitaCore->GetMemoryManager()->GetParty()->GetMemberZone(0);
+    info.serverId = 0; // TODO
+    this->reporterCore->HandlePacketData(info, modified, size);
     return false;
 }
 

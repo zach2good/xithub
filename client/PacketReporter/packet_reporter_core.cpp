@@ -4,23 +4,6 @@
 
 #include "gzip.h"
 
-#pragma pack(push, 1)
-struct OuterPacketHeader
-{
-    uint64_t userId;
-    uint64_t timestamp;
-    uint32_t dataSize;
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct InnerPacketHeader
-{
-    uint64_t timestamp;
-    uint32_t dataSize;
-};
-#pragma pack(pop)
-
 PacketReporterCore::PacketReporterCore(LoggingCallback loggingCallback)
     : m_loggingCallback(loggingCallback)
 {
@@ -60,7 +43,7 @@ bool PacketReporterCore::DetectRetail()
     return GetModuleHandleA("polhook.dll") != NULL;
 }
 
-void PacketReporterCore::HandlePacketData(uint8_t* data, uint32_t dataSz)
+void PacketReporterCore::HandlePacketData(CharacterInfo charInfo, uint8_t* data, uint32_t dataSz)
 {
     if (!DetectRetail())
     {
@@ -71,6 +54,7 @@ void PacketReporterCore::HandlePacketData(uint8_t* data, uint32_t dataSz)
 
     InnerPacketHeader innerHeader;
     innerHeader.timestamp = timestamp;
+    innerHeader.zoneId    = charInfo.zoneId;
     innerHeader.dataSize  = dataSz;
 
     m_buffer.insert(m_buffer.end(), reinterpret_cast<uint8_t*>(&innerHeader), reinterpret_cast<uint8_t*>(&innerHeader) + sizeof(innerHeader));
@@ -84,8 +68,10 @@ void PacketReporterCore::HandlePacketData(uint8_t* data, uint32_t dataSz)
 
         // Outer header
         OuterPacketHeader header;
-        header.userId    = 44;
+        header.userId    = 44; // TODO: Look up from user config
         header.timestamp = timestamp;
+        header.serverId  = charInfo.serverId;
+        std::memcpy(header.characterName, charInfo.name.c_str(), std::min<size_t>(charInfo.name.size(), sizeof(header.characterName)));
         header.dataSize  = compressed_data_size;
 
         // Allocate memory for the entire packet
