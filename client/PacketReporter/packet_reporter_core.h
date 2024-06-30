@@ -71,6 +71,7 @@ public:
     bool DetectRetail();
 
     void HandlePacketData(CharacterInfo charInfo, uint8_t* data, uint32_t dataSz);
+    void SendBuffer();
 
 private:
     LoggingCallback m_loggingCallback;
@@ -83,4 +84,6 @@ private:
 
     std::vector<uint8_t> m_buffer;
     size_t m_bufferLimit = 4096;
+
+    CharacterInfo m_charInfo;
 };
