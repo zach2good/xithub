@@ -1,6 +1,5 @@
-DROP TABLE IF EXISTS packets;
 CREATE TABLE packets (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     UserId BIGINT NOT NULL,
     SessionId VARCHAR(50) NOT NULL,
     CharacterName VARCHAR(15) NOT NULL,
@@ -11,5 +10,6 @@ CREATE TABLE packets (
     PacketId VARCHAR(50) NOT NULL,
     PacketHash VARCHAR(64) NOT NULL,
     RawData LONGBLOB NOT NULL,
-    INDEX unique_user_session_hash(UserId, PacketHash)
+    INDEX unique_userid(UserId),
+    INDEX unique_packethash(PacketHash)
 );

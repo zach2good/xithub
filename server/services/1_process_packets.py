@@ -190,7 +190,6 @@ def process_packet(file_path, db_connection):
             except mysql.connector.Error as err:
                 print(f"Error inserting packet data: {err}")
                 cursor.close()
-                exit(1)
 
     print(f"Finished processing file: {file_path}")
 

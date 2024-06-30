@@ -5,7 +5,7 @@ A central repository for FFXI packet data.
 ## TODO Before Use
 
 - Use TCP instead of UDP?
-- Make sure we use the same compression everywhere (GZip, zlib, ZipFile, etc. - It'll be gzip everywhere).
+- Make sure we use the same compression everywhere (GZip, zlib, ZipFile, Brotli, etc. - It'll be gzip everywhere).
 - Handle both S2C and C2S packets.
 - Timed fallback for sending buffer from client.
 - Forced send from client on logout.
