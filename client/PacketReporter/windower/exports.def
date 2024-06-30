@@ -1,0 +1,4 @@
+LIBRARY _PacketReporter.dll
+
+EXPORTS
+	luaopen__PacketReporter
