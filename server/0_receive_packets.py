@@ -26,6 +26,8 @@ def start_server(host='localhost', port=5000, output_dir='packets'):
             outer_header_data = data[:outer_header_size]
             userId, timestamp, compressed_data_size = struct.unpack(outer_header_format, outer_header_data)
 
+            # TODO: Validate userId and throw away the packet if it's isn't a registered user
+
             # Store the entire packet to a file
             packet_filename = os.path.join(output_dir, f"packet_{userId}_{timestamp}.bin")
             with open(packet_filename, 'wb') as packet_file:

@@ -12,10 +12,6 @@ RUNTIME_DATA_DIR = 'runtime_data'
 SESSIONS_FILE = os.path.join(RUNTIME_DATA_DIR, 'sessions.txt')
 SESSION_MAX_AGE_MINUTES = 2
 
-# Ensure the runtime data directory exists
-if not os.path.exists(RUNTIME_DATA_DIR):
-    os.makedirs(RUNTIME_DATA_DIR)
-
 
 def generate_session_id(user_id):
     return str(user_id) + str(int(time.time()))

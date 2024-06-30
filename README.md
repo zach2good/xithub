@@ -6,8 +6,31 @@ A central repository for FFXI packet data.
 
 - Use TCP instead of UDP?
 - Make sure we use the same compression everywhere (GZip, zlib, ZipFile, etc. - It'll be gzip everywhere).
+- Handle both S2C and C2S packets.
 - Timed fallback for sending buffer from client.
 - Forced send from client on logout.
+- Do not archive packets that are part of a currently-ongoing session.
+- Cut session if character name changes (logging into alts), but session should be cut automatically on logout.
+- A final stage of processing to happen when a session is closed.
+- Address all leftover TODOs
+- OAuth (Google only) authentication flow, server + client
+- Premade/cached lookups per session (generated during processing):
+  - Events + Args
+  - Mobs spawned
+  - Estimate mob HP
+- Closed testing
+- Write up terms and conditions - you won't be allowed to revoke your packet data!
+- GDPR, User Data, Safety
+- Host server somewhere in GCP
+
+## Long Term
+
+- Allow users to look up their sessions and add links to videos to them
+  - Would be lovely to embed them too (but not host!).
+- Allow users to download their session packet data, in multiple formats (PacketViewer, Binary, etc.)
+- Archive to GCP's Cold Storage equivalent
+- AH data?
+- What if it gets expensive to run/maintain?
 
 ## Packet Binary Format
 
@@ -17,6 +40,8 @@ struct OuterPacketHeader
 {
     uint64_t userId;
     uint64_t timestamp;
+    uint8_t  serverId;
+    char     characterName[15];
     uint32_t dataSize;
 };
 #pragma pack(pop)
@@ -25,6 +50,7 @@ struct OuterPacketHeader
 struct InnerPacketHeader
 {
     uint64_t timestamp;
+    uint16_t zoneId;
     uint32_t dataSize;
 };
 #pragma pack(pop)
