@@ -1,3 +1,4 @@
+# This script will archive the processed packets into a zip file every 24 hours.
 import os
 import time
 from datetime import datetime, timedelta

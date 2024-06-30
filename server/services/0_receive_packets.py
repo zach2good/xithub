@@ -1,3 +1,5 @@
+# This script is responsible for receiving packets from the client and storing them in a file.
+# It also validates the user ID and throws away the packet if it isn't a registered user.
 import socket
 import struct
 import os
