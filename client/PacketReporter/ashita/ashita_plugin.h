@@ -38,6 +38,9 @@ class PacketReporter final : public IPlugin
     ILogManager* m_LogManager; // The pointer to the main Ashita LogManager object.
     uint32_t m_PluginId;       // The plugins id. (The plugins current base address.)
 
+    uintptr_t ntsys_;
+    uintptr_t gcmainsys_;
+
     std::unique_ptr<PacketReporterCore> reporterCore;
     std::string clientToken;
 
@@ -64,6 +67,10 @@ public:
 
     // Event Callbacks: PacketManager
     bool HandleIncomingPacket(uint16_t id, uint32_t size, const uint8_t* data, uint8_t* modified, uint32_t sizeChunk, const uint8_t* dataChunk, bool injected, bool blocked) override;
+
+    // Helper Methods
+    auto get_selected_character_index(void) const -> uint32_t;
+    auto get_character_world(const uint32_t index) const -> uint16_t;
 };
 
 #endif // ASHITA_PacketReporter_HPP_INCLUDED

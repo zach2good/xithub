@@ -31,6 +31,8 @@ PacketReporter::PacketReporter(void)
     : m_AshitaCore{nullptr}
     , m_LogManager{nullptr}
     , m_PluginId(0)
+    , ntsys_{0}
+    , gcmainsys_{0}
 {
 }
 
@@ -83,6 +85,26 @@ bool PacketReporter::Initialize(IAshitaCore* core, ILogManager* logger, const ui
     this->m_AshitaCore = core;
     this->m_LogManager = logger;
     this->m_PluginId   = id;
+
+    auto name = this->m_AshitaCore->GetConfigurationManager()->GetString("boot", "bootloader", "gamemodule");
+    if (name == nullptr)
+    {
+        name = "FFXiMain.dll";
+    }
+
+    MODULEINFO minfo{};
+    if (!::GetModuleInformation(::GetCurrentProcess(), ::GetModuleHandleA(name), &minfo, sizeof(MODULEINFO)))
+    {
+        return false;
+    }
+
+    this->ntsys_     = Ashita::Memory::FindPattern(reinterpret_cast<uintptr_t>(minfo.lpBaseOfDll), minfo.SizeOfImage, "A1????????8B88B4000000C1E907F6C101E9", 1, 0);
+    this->gcmainsys_ = Ashita::Memory::FindPattern(reinterpret_cast<uintptr_t>(minfo.lpBaseOfDll), minfo.SizeOfImage, "A1????????5685C05774??8BB0????????85F6", 1, 0);
+
+    if (this->ntsys_ == 0 || this->gcmainsys_ == 0)
+    {
+        return false;
+    }
 
     this->reporterCore = std::make_unique<PacketReporterCore>([this](const std::string& msg) {
         this->m_AshitaCore->GetChatManager()->Write(1, false, msg.c_str());
@@ -145,11 +167,34 @@ bool PacketReporter::HandleIncomingPacket(uint16_t id, uint32_t size, const uint
 
     info.name     = m_AshitaCore->GetMemoryManager()->GetParty()->GetMemberName(0);
     info.zoneId   = m_AshitaCore->GetMemoryManager()->GetParty()->GetMemberZone(0);
-    info.serverId = 0; // TODO
+    info.serverId = this->get_character_world(this->get_selected_character_index());
 
     this->reporterCore->HandlePacketData(info, modified, size);
 
     return false;
+}
+
+/**
+     * Returns the index of the currently selected character that is playing.
+     *
+     * @return {uint32_t} The selected character index.
+     */
+auto PacketReporter::get_selected_character_index(void) const -> uint32_t
+{
+    return Ashita::Memory::SafeReadPtr<uint32_t>(this->ntsys_, {0x00, 0x00, 0x80}, 0);
+}
+
+/**
+     * Returns the world index of the character at the given index.
+     *
+     * @param {uint32_t} index - The character index.
+     * @return {uint32_t} The selected character world index.
+     */
+auto PacketReporter::get_character_world(const uint32_t index) const -> uint16_t
+{
+    const auto idx = static_cast<int32_t>(0x13824 + (index * 0x8C));
+
+    return Ashita::Memory::SafeReadPtr<uint16_t>(this->gcmainsys_, {0x00, 0x00, idx + 0x06}, 0);
 }
 
 extern "C" __declspec(dllexport) IPlugin* __stdcall expCreatePlugin(const char* args)
